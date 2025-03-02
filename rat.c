@@ -87,7 +87,7 @@ void archive_files(const char *output_path, char **input_paths, uint64_t number_
 void extract_files(char *input_path)
 {
     // [number of files: 64] [length of path: 64] [path: 64] [file size: 64] [contents: ?]
-    Region r = region_alloc_alloc(1024 * 1024 * 512);
+    Region r = region_alloc_alloc(1024 * 1024);
 
     FILE *input_file = fopen(input_path, "r");
     assert(input_file);
