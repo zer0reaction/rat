@@ -42,38 +42,38 @@ void region_free(Region *r)
     free(r->data);
 }
 
-uint64_t get_file_size(const char *path)
+size_t get_file_size(const char *path)
 {
     FILE *file = fopen(path, "r");
 
     fseek(file, 0, SEEK_END);
-    uint64_t file_size = ftell(file);
+    size_t file_size = ftell(file);
     fseek(file, 0, SEEK_SET);
 
     fclose(file);
     return file_size;
 }
 
-void archive_files(const char *output_path, char **input_paths, uint64_t number_of_input_paths)
+void archive_files(const char *output_path, char **input_paths, size_t number_of_input_paths)
 {
     FILE *output_file = fopen(output_path, "a");
     assert(output_file);
 
     fwrite(&number_of_input_paths, sizeof(number_of_input_paths), 1, output_file);
 
-    for (uint64_t i = 0; i < number_of_input_paths; i++) {
+    for (size_t i = 0; i < number_of_input_paths; i++) {
         char *input_path = input_paths[i];
         FILE *input_file = fopen(input_path, "rb");
         assert(input_file);
 
-        uint64_t input_path_size = strlen(input_path);
-        uint64_t input_file_size = get_file_size(input_path);
+        size_t input_path_size = strlen(input_path);
+        size_t input_file_size = get_file_size(input_path);
 
         fwrite(&input_path_size, sizeof(input_path_size), 1, output_file);
         fwrite(input_path, input_path_size, 1, output_file);
         fwrite(&input_file_size, sizeof(input_file_size), 1, output_file);
 
-        for (uint64_t i = 0; i < input_file_size; i++) {
+        for (size_t i = 0; i < input_file_size; i++) {
             char8_t c = fgetc(input_file);
             fwrite(&c, 1, 1, output_file);
         }
@@ -92,18 +92,18 @@ void extract_files(char *input_path)
     FILE *input_file = fopen(input_path, "r");
     assert(input_file);
 
-    uint64_t number_of_files;
+    size_t number_of_files;
     fread(&number_of_files, sizeof(number_of_files), 1, input_file);
 
-    for (uint64_t i = 0; i < number_of_files; i++) {
-        uint64_t length_of_path;
+    for (size_t i = 0; i < number_of_files; i++) {
+        size_t length_of_path;
         fread(&length_of_path, sizeof(length_of_path), 1, input_file);
 
         char *path = region_alloc(&r, length_of_path + 1);
         fread(path, length_of_path, 1, input_file);
         path[length_of_path] = 0;
 
-        uint64_t file_size;
+        size_t file_size;
         fread(&file_size, sizeof(file_size), 1, input_file);
 
         FILE *output_file = fopen(path, "a");
